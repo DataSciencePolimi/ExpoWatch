@@ -1,0 +1,25 @@
+{
+  "name": "ExpoWatch",
+  "version": "0.0.0",
+  "description": "",
+  "main": "crawler.js",
+  "dependencies": {
+    "async": "^0.9.0",
+    "bluebird": "^2.3.10",
+    "debug": "^2.1.0",
+    "fb": "^0.7.0",
+    "fbgraph": "^0.3.0",
+    "instagram-node": "^0.5.1",
+    "mongoose": "^3.8.18",
+    "path": "^0.4.9",
+    "twit": "^1.1.18",
+    "twitter": "^0.2.13",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
