@@ -54,7 +54,7 @@ function crawl() {
     .then(function() {
       debug('Iteration done');
     })
-    .delay(3000)
+    .delay(3600000)
     .then(crawl);
 }
 

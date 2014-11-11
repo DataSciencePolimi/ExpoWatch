@@ -28,7 +28,7 @@ var saveData = function(data) {
   return (new Account(rawAccount)).saveAsync();
 };
 
-var getAccountStat = function(data, callback) {
+var getAccountStat = function(data) {
   debug('Getting the stat for the %s account', data.name);
 
   return FB.getAsync('/' + data.id)
