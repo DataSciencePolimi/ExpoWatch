@@ -12,6 +12,10 @@
     createdDate: {
       type: Date,
       'default': Date.now
+    },
+    media: {
+      type: [{}],
+      'default': []
     }
 
   });

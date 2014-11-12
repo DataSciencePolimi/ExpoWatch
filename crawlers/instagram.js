@@ -25,17 +25,51 @@ var saveData = function(data) {
     post: data[0].counts.media,
     follower: data[0].counts.followed_by,
     likes: data[0].counts.followed_by,
-    following: data[0].counts.follows
+    following: data[0].counts.follows,
+    media: data[0].media
   };
 
+  delete rawAccount.raw.media;
   var Account = mongoose.model('account');
 
   return (new Account(rawAccount)).saveAsync();
 };
 
+
+var getPhotos = function(data) {
+
+  var media = [];
+  var handleRequest = function(images, pagination) {
+    debug('getting the photo');
+    return Promise.resolve()
+      .then(function() {
+        media = media.concat(images);
+        if (pagination.next) {
+          debug('new page');
+          var nextPage = Promise.promisify(pagination.next);
+          return nextPage().spread(handleRequest);
+        } else {
+          debug('images downloaded');
+          data[0].media = media;
+          return data;
+        }
+
+      });
+  };
+
+
+  return ig.user_media_recentAsync(data[0].id)
+    .spread(handleRequest)
+    .catch(function(err) {
+      debug('An error occurred');
+      debug(err);
+    });
+};
+
 var getAccountStat = function(data) {
   debug('Getting the stat for the %s account', data.name);
   return ig.userAsync(data.id)
+    .then(getPhotos)
     .then(saveData)
     .catch(function(err) {
       debug('An error occurred');
