@@ -129,7 +129,7 @@ window.onload = function() {
 
   $.material.init();
 
-  $.ajax('http://localhost:3210/stats?social=instagram')
+  $.ajax('http://dijkstra.seco:3210/stats?social=instagram')
     .done(function(result) {
 
       draw(result, '#instagram_abs');
@@ -144,7 +144,7 @@ window.onload = function() {
     console.log('asd');
     if ($('#instagram_delta .highcharts-container').length === 0) {
       console.log('lol');
-      $.ajax('http://localhost:3210/delta?social=instagram')
+      $.ajax('http://dijkstra.seco:3210/delta?social=instagram')
         .done(function(result) {
 
           draw(result, '#instagram_delta');
