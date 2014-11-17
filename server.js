@@ -123,7 +123,6 @@ app.get('/stats', function(req, res) {
       followers: 1,
       followings: 1,
       social: 1,
-      media: 1
     })
     .sort({
       "createdDate": 1
@@ -152,7 +151,7 @@ app.get('/stats', function(req, res) {
       });*/
 
       if (social === 'instagram') {
-        console.log('Retrievign iamges stat')
+        console.log('Retrievign iamges stat');
         return aggregateInstragram(function(err, result) {
           if (result) {
             data.photoStats = result;
