@@ -65,7 +65,7 @@ window.onload = function() {
 
   $.material.init();
 
-  $.ajax('http://dijkstra.seco:3210/stats?social=facebook')
+  $.ajax('stats?social=facebook')
     .done(function(result) {
 
       draw(result, '#facebook_abs');
@@ -79,7 +79,7 @@ window.onload = function() {
     console.log('asd');
     if ($('#facebook_delta .highcharts-container').length === 0) {
       console.log('lol');
-      $.ajax('http://dijkstra.seco:3210/delta?social=facebook')
+      $.ajax('delta?social=facebook')
         .done(function(result) {
 
           draw(result, '#facebook_delta');

@@ -66,7 +66,7 @@ window.onload = function() {
 
   $.material.init();
 
-  $.ajax('http://dijkstra.seco:3210/stats?social=twitter')
+  $.ajax('stats?social=twitter')
     .done(function(result) {
 
       draw(result, '#twitter_abs');
@@ -80,7 +80,7 @@ window.onload = function() {
     console.log('asd');
     if ($('#twitter_delta .highcharts-container').length === 0) {
       console.log('lol');
-      $.ajax('http://dijkstra.seco:3210/delta?social=twitter')
+      $.ajax('delta?social=twitter')
         .done(function(result) {
 
           draw(result, '#twitter_delta');
