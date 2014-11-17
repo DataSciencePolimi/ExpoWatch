@@ -2,7 +2,6 @@ var express = require('express');
 var mongoose = require('mongoose');
 var Promise = require('bluebird');
 var _ = require('underscore');
-var debug = require('debug')('server');
 
 var Account = require('./model/account');
 
@@ -87,12 +86,12 @@ app.get('/delta', function(req, res) {
     })
     .exec(function(err, result) {
       if (err) {
-        debug(err);
+        console.log(err);
 
         return res.send(err);
       }
 
-      debug('data retrieved');
+      console.log('data retrieved');
 
       var data = {};
 
@@ -131,12 +130,12 @@ app.get('/stats', function(req, res) {
     })
     .exec(function(err, result) {
       if (err) {
-        debug(err);
+        console.log(err);
 
         return res.send(err);
       }
 
-      debug('data retrieved');
+      console.log('data retrieved');
       var data = {};
 
       _.each(result, function(stat) {
@@ -153,7 +152,7 @@ app.get('/stats', function(req, res) {
       });*/
 
       if (social === 'instagram') {
-        debug('Retrievign iamges stat')
+        console.log('Retrievign iamges stat')
         return aggregateInstragram(function(err, result) {
           if (result) {
             data.photoStats = result;
@@ -164,7 +163,7 @@ app.get('/stats', function(req, res) {
           return res.json(data);
         });
       } else {
-        debug('Sending the response');
+        console.log('Sending the response');
         return res.json(data);
       }
 
