@@ -133,7 +133,7 @@ window.onload = function() {
     .done(function(result) {
 
       draw(result, '#instagram_abs');
-      drawPhotoStat(result);
+      //drawPhotoStat(result);
 
     })
     .fail(function(jqXHR, textStatus) {

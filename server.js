@@ -150,8 +150,8 @@ app.get('/stats', function(req, res) {
         return elem[0];
       });*/
 
-      if (social === 'instagram') {
-        console.log('Retrievign iamges stat');
+      /*if (social === 'instagram') {
+        console.log('Retrieving images stat');
         return aggregateInstragram(function(err, result) {
           if (result) {
             data.photoStats = result;
@@ -164,9 +164,10 @@ app.get('/stats', function(req, res) {
       } else {
         console.log('Sending the response');
         return res.json(data);
-      }
+      }*/
 
-
+      console.log('Sending the response');
+      return res.json(data);
     });
 });
 
