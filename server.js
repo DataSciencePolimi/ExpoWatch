@@ -25,31 +25,47 @@ function toUTC(dateString) {
 
 }
 
-function aggregateInstragram(data) {
+function aggregateInstragram(callback) {
 
-  var photoStats = [];
 
-  _.each(data, function(snapshot) {
-    var photos = snapshot.media;
+  Account
+    .find()
+    .where('social', 'instagram')
+    .select({
+      createdDate: 1,
+      media: 1
+    })
+    .sort({
+      'createdDate': 1
+    })
+    .exec(function(err, data) {
+      if (err) {
+        console.log(err);
 
-    if (_.isUndefined(photos) || photos.length === 0) {
-      return;
-    }
+        return callback();
+      }
 
-    var likes = 0;
+      var photoStats = [];
 
-    _.each(photos, function(photo) {
-      likes += photo.likes.count;
+      _.each(data, function(snapshot) {
+        var photos = snapshot.media;
+
+        if (_.isUndefined(photos) || photos.length === 0) {
+          return;
+        }
+
+        var likes = 0;
+
+        _.each(photos, function(photo) {
+          likes += photo.likes.count;
+        });
+
+        photoStats.push([toUTC(snapshot.createdDate), likes]);
+      });
+
+      return callback(null, photoStats);
+
     });
-
-    photoStats.push([toUTC(snapshot.createdDate), likes]);
-  });
-
-  photoStats = _.sortBy(photoStats, function(elem) {
-    return elem[0];
-  });
-
-  return photoStats;
 
 }
 
@@ -64,8 +80,7 @@ app.get('/delta', function(req, res) {
       likes: 1,
       followers: 1,
       followings: 1,
-      social: 1,
-      media: 1
+      social: 1
     })
     .sort({
       "createdDate": 1
@@ -133,15 +148,26 @@ app.get('/stats', function(req, res) {
         data[stat.social].push([toUTC(stat.createdDate), stat.likes]);
       });
 
-      data[social] = _.sortBy(data[social], function(elem) {
+      /*data[social] = _.sortBy(data[social], function(elem) {
         return elem[0];
-      });
+      });*/
 
       if (social === 'instagram') {
-        data.photoStats = aggregateInstragram(result);
+        debug('Retrievign iamges stat')
+        return aggregateInstragram(function(err, result) {
+          if (result) {
+            data.photoStats = result;
+
+            return res.json(data);
+          }
+
+          return res.json(data);
+        });
+      } else {
+        debug('Sending the response');
+        return res.json(data);
       }
 
-      return res.json(data);
 
     });
 });
