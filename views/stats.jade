@@ -12,12 +12,12 @@ body
         div(role="tabpanel")
           ul.nav.nav-tabs(role="tablist")
             li(role="presentation").active
-              a(href="#twitter_abs" aria-controls="twitter_abs" role="tab" data-toggle="tab") Twitter Absolute
+              a(href="##{social}_abs" aria-controls="#{social}_abs" role="tab" data-toggle="tab") #{social.charAt(0).toUpperCase()+social.substring(1)} Absolute
             li(role="presentation")
-              a(href="#twitter_delta" aria-controls="twitter_delta" role="tab" data-toggle="tab") Twitter Increment
+              a(href="##{social}_delta" aria-controls="#{social}_delta" role="tab" data-toggle="tab") #{social.charAt(0).toUpperCase()+social.substring(1)} Increment
         .tab-content
-          #twitter_abs.tab-pane.active(role="tabpanel")
-          #twitter_delta.tab-pane(role="tabpanel")
+          div(id="#{social}_abs").tab-pane.active(role="tabpanel")
+          div(id="#{social}_delta").tab-pane(role="tabpanel")
 
 
 
@@ -27,4 +27,4 @@ script(src="javascript/lib/bootstrap.min.js")
 script(src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.1.5/js/ripples.min.js")
 script(src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/0.1.5/js/material.min.js")
 script(src="javascript/lib/highcharts.js")
-script(src="javascript/twitter.js")
+script(src="javascript/#{social}.js")

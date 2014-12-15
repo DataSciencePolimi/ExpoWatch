@@ -1,11 +1,18 @@
-var draw = function(data, element) {
+function slugify(Text) {
+  return Text
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
+}
+
+var draw = function(data, name, element) {
 
   $(element).highcharts({
     chart: {
       zoomType: 'x'
     },
     title: {
-      text: 'Twitter followers'
+      text: 'Twitter ' + name + 'followers'
     },
     subtitle: {
       text: document.ontouchstart === undefined ?
@@ -54,8 +61,8 @@ var draw = function(data, element) {
       type: 'area',
       name: 'Twitter follower',
       pointInterval: 24 * 3600 * 1000,
-      pointStart: data['twitter'][0][0],
-      data: data['twitter']
+      pointStart: data[0][0],
+      data: data
 
     }]
   });
@@ -69,7 +76,11 @@ window.onload = function() {
   $.ajax('stats?social=twitter')
     .done(function(result) {
 
-      draw(result, '#twitter_abs');
+      for (k in result) {
+        var $graphContainer = $('<div id="' + slugify(k) + '">');
+        $graphContainer.appendTo($('#twitter_abs'));
+        draw(result[k], k, '#' + slugify(k));
+      }
 
     })
     .fail(function(jqXHR, textStatus) {
@@ -83,7 +94,11 @@ window.onload = function() {
       $.ajax('delta?social=twitter')
         .done(function(result) {
 
-          draw(result, '#twitter_delta');
+          for (k in result) {
+            var $graphContainer = $('<div id="' + slugify(k) + '_delta">');
+            $graphContainer.appendTo($('#twitter_delta'));
+            draw(result[k], k, '#' + slugify(k) + '_delta');
+          }
 
         })
         .fail(function(jqXHR, textStatus) {

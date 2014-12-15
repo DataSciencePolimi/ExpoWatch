@@ -1,11 +1,18 @@
-var draw = function(data, element) {
+function slugify(Text) {
+  return Text
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
+}
+
+var draw = function(data, name, element) {
 
   $(element).highcharts({
     chart: {
       zoomType: 'x'
     },
     title: {
-      text: 'Instagram followers'
+      text: 'Instagram ' + name + ' followers'
     },
     subtitle: {
       text: document.ontouchstart === undefined ?
@@ -17,7 +24,7 @@ var draw = function(data, element) {
     },
     yAxis: {
       title: {
-        text: '#likes'
+        text: '#followers'
       }
     },
     legend: {
@@ -52,74 +59,10 @@ var draw = function(data, element) {
 
     series: [{
       type: 'area',
-      name: 'Instagram followers',
+      name: 'instagram follower',
       pointInterval: 24 * 3600 * 1000,
-      pointStart: data['instagram'][0][0],
-      data: data['instagram']
-
-    }]
-  });
-};
-
-
-var drawPhotoStat = function(data) {
-
-  $('#photo').highcharts({
-    chart: {
-      zoomType: 'x'
-    },
-    title: {
-      text: 'Photo likes'
-    },
-    subtitle: {
-      text: document.ontouchstart === undefined ?
-        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-    },
-    xAxis: {
-      type: 'datetime',
-      //minRange: 14 * 24 * 3600000 // fourteen days
-    },
-    yAxis: {
-      title: {
-        text: '#likes'
-      }
-    },
-    legend: {
-      enabled: false
-    },
-    plotOptions: {
-      area: {
-        fillColor: {
-          linearGradient: {
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: 1
-          },
-          stops: [
-            [0, Highcharts.getOptions().colors[0]],
-            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-          ]
-        },
-        marker: {
-          radius: 2
-        },
-        lineWidth: 1,
-        states: {
-          hover: {
-            lineWidth: 1
-          }
-        },
-        threshold: null
-      }
-    },
-
-    series: [{
-      type: 'area',
-      name: 'Instagram followers',
-      pointInterval: 24 * 3600 * 1000,
-      pointStart: data.photoStats[0][0],
-      data: data.photoStats
+      pointStart: data[0][0],
+      data: data
 
     }]
   });
@@ -127,13 +70,17 @@ var drawPhotoStat = function(data) {
 
 window.onload = function() {
 
+
   $.material.init();
 
   $.ajax('stats?social=instagram')
     .done(function(result) {
 
-      draw(result, '#instagram_abs');
-      //drawPhotoStat(result);
+      for (k in result) {
+        var $graphContainer = $('<div id="' + slugify(k) + '">');
+        $graphContainer.appendTo($('#instagram_abs'));
+        draw(result[k], k, '#' + slugify(k));
+      }
 
     })
     .fail(function(jqXHR, textStatus) {
@@ -147,7 +94,11 @@ window.onload = function() {
       $.ajax('delta?social=instagram')
         .done(function(result) {
 
-          draw(result, '#instagram_delta');
+          for (k in result) {
+            var $graphContainer = $('<div id="' + slugify(k) + '_delta">');
+            $graphContainer.appendTo($('#instagram_delta'));
+            draw(result[k], k, '#' + slugify(k) + '_delta');
+          }
 
         })
         .fail(function(jqXHR, textStatus) {
@@ -155,6 +106,7 @@ window.onload = function() {
         });
     }
   });
+
 
 
 };

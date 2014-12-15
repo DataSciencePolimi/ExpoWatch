@@ -2,7 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var Promise = require('bluebird');
 var _ = require('underscore');
-
+var debug = require('debug')('server');
 var Account = require('./model/account');
 
 Promise.promisifyAll(mongoose);
@@ -79,7 +79,9 @@ app.get('/delta', function(req, res) {
       likes: 1,
       followers: 1,
       followings: 1,
-      social: 1
+      social: 1,
+      "raw.name": 1,
+      "raw.username": 1
     })
     .sort({
       "createdDate": 1
@@ -95,15 +97,28 @@ app.get('/delta', function(req, res) {
 
       var data = {};
 
-      data[social] = [];
 
-      for (var i = 1; i < result.length; i++) {
-        var delta = result[i].likes - result[i - 1].likes;
+
+      for (var i = 0; i < result.length; i++) {
+
+        var key = result[i].raw.name || result[i].raw.username;
+
+        var prev;
+
+        if (!data[key]) {
+          data[key] = [];
+          prev = result[i].likes;
+        } else {
+          prev = delta[key][i - 1];
+        }
+
+        var delta = result[i].likes - prev;
         var date = result[i].createdDate;
 
-        data[social].push([toUTC(date), delta]);
+        data[key].push([toUTC(date), delta]);
       }
 
+      debug(data);
       return res.json(data);
 
     });
@@ -123,6 +138,8 @@ app.get('/stats', function(req, res) {
       followers: 1,
       followings: 1,
       social: 1,
+      "raw.name": 1,
+      "raw.username": 1
     })
     .sort({
       "createdDate": 1
@@ -139,33 +156,16 @@ app.get('/stats', function(req, res) {
 
       _.each(result, function(stat) {
 
-        if (!data[stat.social]) {
-          data[stat.social] = [];
+        var key = stat.raw.name || stat.raw.username;
+
+        if (!data[key]) {
+          data[key] = [];
         }
 
-        data[stat.social].push([toUTC(stat.createdDate), stat.likes]);
+        data[key].push([toUTC(stat.createdDate), stat.likes]);
       });
 
-      /*data[social] = _.sortBy(data[social], function(elem) {
-        return elem[0];
-      });*/
-
-      /*if (social === 'instagram') {
-        console.log('Retrieving images stat');
-        return aggregateInstragram(function(err, result) {
-          if (result) {
-            data.photoStats = result;
-
-            return res.json(data);
-          }
-
-          return res.json(data);
-        });
-      } else {
-        console.log('Sending the response');
-        return res.json(data);
-      }*/
-
+      debug(data);
       console.log('Sending the response');
       return res.json(data);
     });
@@ -178,13 +178,19 @@ app.get('/index', function(req, res) {
   res.render('index.jade');
 });
 app.get('/facebook', function(req, res) {
-  res.render('facebook.jade');
+  res.render('stats.jade', {
+    social: 'facebook'
+  });
 });
 app.get('/twitter', function(req, res) {
-  res.render('twitter.jade');
+  res.render('stats.jade', {
+    social: 'twitter'
+  });
 });
 app.get('/instagram', function(req, res) {
-  res.render('instagram.jade');
+  res.render('stats.jade', {
+    social: 'instagram'
+  });
 });
 
 app.listen(3210, function() {

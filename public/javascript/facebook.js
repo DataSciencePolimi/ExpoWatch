@@ -1,11 +1,18 @@
-var draw = function(data, element) {
+function slugify(Text) {
+  return Text
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
+}
+
+var draw = function(data, name, element) {
 
   $(element).highcharts({
     chart: {
       zoomType: 'x'
     },
     title: {
-      text: 'Facebook likes'
+      text: 'Facebook likes on ' + name
     },
     subtitle: {
       text: document.ontouchstart === undefined ?
@@ -17,7 +24,7 @@ var draw = function(data, element) {
     },
     yAxis: {
       title: {
-        text: '#likes'
+        text: '#followers'
       }
     },
     legend: {
@@ -52,10 +59,10 @@ var draw = function(data, element) {
 
     series: [{
       type: 'area',
-      name: 'facebook likes',
+      name: 'facebook follower',
       pointInterval: 24 * 3600 * 1000,
-      ointStart: data['facebook'][0][0],
-      data: data['facebook']
+      pointStart: data[0][0],
+      data: data
 
     }]
   });
@@ -63,12 +70,17 @@ var draw = function(data, element) {
 
 window.onload = function() {
 
+
   $.material.init();
 
   $.ajax('stats?social=facebook')
     .done(function(result) {
 
-      draw(result, '#facebook_abs');
+      for (k in result) {
+        var $graphContainer = $('<div id="' + slugify(k) + '">');
+        $graphContainer.appendTo($('#facebook_abs'));
+        draw(result[k], k, '#' + slugify(k));
+      }
 
     })
     .fail(function(jqXHR, textStatus) {
@@ -82,7 +94,11 @@ window.onload = function() {
       $.ajax('delta?social=facebook')
         .done(function(result) {
 
-          draw(result, '#facebook_delta');
+          for (k in result) {
+            var $graphContainer = $('<div id="' + slugify(k) + '_delta">');
+            $graphContainer.appendTo($('#facebook_delta'));
+            draw(result[k], k, '#' + slugify(k) + '_delta');
+          }
 
         })
         .fail(function(jqXHR, textStatus) {
@@ -90,5 +106,7 @@ window.onload = function() {
         });
     }
   });
+
+
 
 };
