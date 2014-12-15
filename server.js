@@ -97,29 +97,29 @@ app.get('/delta', function(req, res) {
 
       var data = {};
 
+      _.each(result, function(stat) {
 
-
-      for (var i = 0; i < result.length; i++) {
-
-        var key = result[i].raw.name || result[i].raw.username;
-
-        var prev;
+        var key = stat.raw.name || stat.raw.username;
 
         if (!data[key]) {
           data[key] = [];
-          prev = result[i].likes;
-        } else {
-          prev = delta[key][i - 1];
         }
 
-        var delta = result[i].likes - prev;
-        var date = result[i].createdDate;
+        data[key].push([toUTC(stat.createdDate), stat.likes]);
+      });
 
-        data[key].push([toUTC(date), delta]);
+      var deltas = {};
+      for (var k in data) {
+        var stats = data[k];
+        deltas[k] = [];
+        for (var i = 1; i < stats.length; i++) {
+          var delta = -stats[i - 1][1] + stats[i][1];
+          deltas[k].push([stats[i][0], delta]);
+        }
       }
 
-      debug(data);
-      return res.json(data);
+      debug(deltas);
+      return res.json(deltas);
 
     });
 
