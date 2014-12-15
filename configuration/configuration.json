@@ -23,6 +23,14 @@
     "social": "instagram",
     "id": "1360605561"
   }, {
+    "name": "yourexpo2015",
+    "social": "instagram",
+    "id": "1574448514"
+  }, {
+    "name": "YourExpo2015",
+    "social": "facebook",
+    "id": "739866282755584"
+  }, {
     "name": "Expo2015Milano",
     "social": "facebook",
     "id": "314888134479"
@@ -30,6 +38,10 @@
     "name": "Expo2015Milano",
     "social": "twitter",
     "id": "Expo2015Milano"
+  }, {
+    "name": "YourExpo2015",
+    "social": "twitter",
+    "id": "YourExpo2015"
   }],
   "db": "mongodb://localhost/expoWatch"
 }
