@@ -8,6 +8,10 @@
     likes: Number,
     followings: Number,
     followers: Number,
+    followersList: {
+      type: [{}],
+      'default': []
+    },
     post: Number,
     createdDate: {
       type: Date,
