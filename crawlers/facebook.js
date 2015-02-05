@@ -36,6 +36,7 @@ var getAccountStat = function(data) {
     .catch(function(err) {
       debug('An error occurred');
       debug(err);
+      throw err;
     });
 };
 

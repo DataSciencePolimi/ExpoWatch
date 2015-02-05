@@ -73,6 +73,7 @@ var getFollowers = function(account, data) {
     .catch(function(err) {
       debug('an error occurred');
       debug('err');
+      throw err;
     });
 };
 
@@ -103,6 +104,7 @@ var getPhotos = function(account, data) {
     .catch(function(err) {
       debug('An error occurred');
       debug(err);
+      throw err;
     });
 };
 
@@ -115,6 +117,7 @@ var getAccountStat = function(account) {
     .catch(function(err) {
       debug('An error occurred');
       debug(err);
+      throw err;
     });
 };
 
