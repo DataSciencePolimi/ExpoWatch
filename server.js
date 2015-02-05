@@ -179,7 +179,7 @@ app.get('/followOverTime', function(req, res) {
   var social = req.query.social;
   var account = req.query.account;
 
-  var AccountModel = db.collection('accounts');
+  var AccountModel = server.db.collection('accounts');
   debug('Retrieving the snapshots');
 
   AccountModel.find({
