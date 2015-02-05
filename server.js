@@ -202,7 +202,7 @@ app.get('/followOverTime', function(req, res) {
 
       debug('writing the file');
 
-      res.json(JSON.stringify(results, null, 2));
+      res.json(results);
     });
 });
 
