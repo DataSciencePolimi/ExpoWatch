@@ -171,6 +171,44 @@ app.get('/stats', function(req, res) {
     });
 });
 
+
+// ENDPOINT PER GRAFICI
+
+app.get('/followOverTime', function(req, res) {
+
+  var social = req.query.social;
+  var account = req.query.account;
+
+  var AccountModel = db.collection('accounts');
+  debug('Retrieving the snapshots');
+
+  AccountModel.find({
+      social: 'instagram',
+      'raw.username': 'yourexpo2015'
+    }, {
+      'createdDate': true,
+      'likes': true
+    })
+    .sort({
+      "createdDate": 1
+    })
+    .toArray(function(err, results) {
+      if (err) return debug(err);
+
+      debug('snapshots retrieved');
+      /*results = _.sortBy(results, function(e) {
+        return e.createdDate;
+      });*/
+
+      debug('writing the file');
+
+      res.json(JSON.stringify(results, null, 2));
+    });
+});
+
+
+// UI
+
 app.get('/', function(req, res) {
   res.render('index.jade');
 });
