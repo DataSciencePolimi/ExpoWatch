@@ -44,7 +44,7 @@
     "social": "twitter",
     "id": "YourExpo2015"
   }],
-  "db": "mongodb://localhost/expowatch",
+  "db": "mongodb://localhost/expoWatch",
   "dbExpoWatch": "mongodb://localhost/expowatch",
   "dbYourExpo": "mongodb://localhost:27017/yourexpo2015"
 }
