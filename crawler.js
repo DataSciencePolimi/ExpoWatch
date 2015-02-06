@@ -47,7 +47,13 @@ function crawl() {
   var promises = [];
 
   _.each(accounts, function(account) {
-    promises.push(callCrawler(account));
+
+    var p = callCrawler(account).catch(function(err) {
+      debug('Crawler for social %s broke', account.social);
+      debug(err);
+    });
+
+    promises.push(p);
   });
 
   return Promise
@@ -55,7 +61,7 @@ function crawl() {
     .then(function() {
       debug('Iteration done');
     })
-    .delay(3600000)
+  .delay(3600000)
     .then(crawl);
 }
 

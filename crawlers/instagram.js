@@ -42,7 +42,6 @@ var saveData = function(account, data) {
 
 var getFollowers = function(account, data) {
 
-
   if (!account.followers) {
     debug("don't have to retrieve follower list");
     return Promise.resolve(data);
