@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Promise = require('bluebird');
 var _ = require('underscore');
 var debug = require('debug')('server');
-var Account = require('./model/account');
+var Account;
 
 Promise.promisifyAll(mongoose);
 Promise.promisifyAll(express);
@@ -28,16 +28,16 @@ function aggregateInstragram(callback) {
 
 
   Account
-    .find()
-    .where('social', 'instagram')
-    .select({
+    .find({
+      social: 'instagram'
+    }, {
       createdDate: 1,
       media: 1
     })
     .sort({
       'createdDate': 1
     })
-    .exec(function(err, data) {
+    .toArray(function(err, data) {
       if (err) {
         console.log(err);
 
@@ -72,9 +72,9 @@ app.get('/delta', function(req, res) {
   var social = req.query.social;
 
   Account
-    .find()
-    .where('social', social)
-    .select({
+    .find({
+      social: social
+    }, {
       createdDate: 1,
       likes: 1,
       followers: 1,
@@ -86,7 +86,7 @@ app.get('/delta', function(req, res) {
     .sort({
       "createdDate": 1
     })
-    .exec(function(err, result) {
+    .toArray(function(err, result) {
       if (err) {
         console.log(err);
 
@@ -130,9 +130,9 @@ app.get('/stats', function(req, res) {
   var social = req.query.social;
 
   Account
-    .find()
-    .where('social', social)
-    .select({
+    .find({
+      social: social
+    }, {
       createdDate: 1,
       likes: 1,
       followers: 1,
@@ -144,7 +144,7 @@ app.get('/stats', function(req, res) {
     .sort({
       "createdDate": 1
     })
-    .exec(function(err, result) {
+    .toArray(function(err, result) {
       if (err) {
         console.log(err);
 
@@ -174,15 +174,10 @@ app.get('/stats', function(req, res) {
 
 // ENDPOINT PER GRAFICI
 
-app.get('/followOverTime', function(req, res) {
+app.get('/followerOverTime', function(req, res) {
 
-  var social = req.query.social;
-  var account = req.query.account;
 
-  var AccountModel = server.db.collection('accounts');
-  debug('Retrieving the snapshots');
-
-  AccountModel.find({
+  Account.find({
       social: 'instagram',
       'raw.username': 'yourexpo2015'
     }, {
@@ -196,9 +191,7 @@ app.get('/followOverTime', function(req, res) {
       if (err) return debug(err);
 
       debug('snapshots retrieved');
-      /*results = _.sortBy(results, function(e) {
-        return e.createdDate;
-      });*/
+
 
       debug('writing the file');
 
@@ -206,7 +199,278 @@ app.get('/followOverTime', function(req, res) {
     });
 });
 
+app.get('/photoOverTime', function(req, res) {
 
+  debug('Retrieving the snapshots');
+
+  var Photo = server.yourExpoDb.collection('photos');
+
+  var query = [{
+    $project: {
+      id: "$providerId",
+      timestamp: "$votes.timestamp"
+    }
+  }, {
+    $unwind: "$timestamp"
+  }, {
+    $group: {
+      _id: "$id",
+      timestamp: {
+        $first: "$timestamp"
+      }
+    }
+  }, {
+    $group: {
+      _id: {
+        year: {
+          $year: "$timestamp"
+        },
+        month: {
+          $month: "$timestamp"
+        },
+        day: {
+          $dayOfMonth: "$timestamp"
+        },
+        hour: {
+          $hour: "$timestamp"
+        },
+
+      },
+      count: {
+        $sum: 1
+      }
+    }
+  }];
+
+  Photo.aggregate(query, {}, function(err, results) {
+    if (err) return debug(err);
+
+    debug('snapshots retrieved');
+
+
+    res.json(results);
+  });
+
+
+
+});
+
+app.get('/likesOverTime', function(req, res) {
+
+
+});
+
+
+app.get('/followBackRatio', function(req, res) {
+
+  var User = server.yourExpoDb.collection('igusers');
+
+  User.find({
+      'followed': true
+    })
+    .toArray(function(err, results) {
+      if (err) return res.json(err);
+
+      var count = 0;
+
+      var Accounts = server.expoWatchDb.collection('accounts');
+
+      Accounts
+        .find({
+          social: 'instagram',
+          'raw.username': 'yourexpo2015'
+        }, {
+          'createdDate': true,
+          'followersList': true
+        })
+        .toArray(function(err, data) {
+          if (err) return debug(err);
+
+          debug(results.length);
+
+          var alreadyFollowers = 0;
+          var followers = [];
+
+          for (var i = 0; i < results.length; i++) {
+            var followedUser = results[i];
+            var stat = [];
+
+            var date = followedUser.followedTimestamp;
+            stat.push(followedUser.username);
+            stat.push(date);
+
+            var futureSnapshots = _.filter(data, function(r) {
+              return r.createdDate > date;
+            });
+
+            var pastSnapshots = _.difference(data, futureSnapshots);
+
+            var f = _.find(pastSnapshots, function(p) {
+              var users = p.followersList;
+
+              var user = _.find(users, function(u) {
+                return u.username === followedUser.username;
+              });
+
+              return user !== undefined;
+            });
+
+            if (f) {
+              alreadyFollowers++;
+              continue;
+            }
+
+
+            if (!f) {
+              var p = _.find(futureSnapshots, function(s) {
+                var users = s.followersList;
+
+                var user = _.find(users, function(u) {
+                  return u.username === followedUser.username;
+                });
+
+                return user !== undefined;
+              });
+
+
+
+              if (p) {
+                stat.push(p.createdDate);
+                stat.push(p.createdDate - date);
+                followers.push(stat);
+                count++;
+              }
+            }
+          }
+
+          debug('Number of people that were already follower %s', alreadyFollowers);
+          debug('Number of converted people %s', count);
+
+          res.json(followers);
+
+
+        });
+    });
+});
+
+app.get('/likeBackRatio', function(req, res) {
+
+  var User = server.yourExpoDb.collection('igusers');
+
+  var alreadyActive = 0;
+
+  User
+    .find({
+      'followed': true
+    })
+    .toArray(function(err, followedUsers) {
+
+      var Photo = server.yourExpoDb.collection('photos');
+      var results = [];
+
+      var query = [{
+        $project: {
+          _id: 0,
+          likers: 1
+        }
+      }, {
+        $unwind: "$likers"
+      }, {
+        $unwind: "$likers.list"
+      }, {
+        $group: {
+          _id: "$likers.list",
+          likes: {
+            $push: "$likers.timestamp"
+          }
+        }
+      }, {
+        $out: "likers"
+      }];
+
+      Photo
+        .aggregate(query, {
+          allowDiskUse: true
+        }, function(err, users) {
+          if (err) return res.json(err);
+
+          var Liker = server.yourExpoDb.collection('likers');
+
+          Liker
+            .find()
+            .toArray(function(err, likers) {
+
+              debug(likers[0]);
+              return res.json(likers[0]);
+            });
+        });
+
+    });
+});
+
+app.get('/likeBackRatioLight', function(req, res) {
+
+  var User = server.yourExpoDb.collection('igusers');
+  var Liker = server.yourExpoDb.collection('likers');
+
+  var results = [];
+  var count = 0;
+  var alreadyActive = 0;
+  User
+    .find({
+      followed: true
+    })
+    .toArray(function(err, users) {
+      if (err) return send.json(err);
+
+      var usernames = _.map(users, function(u) {
+        return u.username;
+      });
+
+      debug('Users retrieved');
+
+      Liker
+        .find({
+          _id: {
+            $in: usernames
+          }
+        })
+        .toArray(function(err, likers) {
+          if (err) return send.json(err);
+
+          for (var i = 0; i < users.length; i++) {
+            var u = users[i];
+            var stat = [];
+            var followedDate = u.followedTimestamp;
+
+            var liker = _.find(likers, function(l) {
+              return l._id === u.username;
+            });
+
+            if (!liker) continue;
+
+            if (liker.likes[0] < followedDate) {
+              alreadyActive++;
+              continue;
+            } else {
+              count++;
+              stat.push(u.username);
+              stat.push(followedDate);
+              stat.push(liker.likes[0]);
+              stat.push(liker.likes[0] - followedDate);
+              results.push(stat);
+            }
+          }
+
+          debug('Followed users %s', users.length);
+          debug('Already active %s', alreadyActive);
+          debug('Converted %s', count);
+
+          res.json(results);
+        });
+    });
+
+});
 // UI
 
 app.get('/', function(req, res) {
@@ -234,8 +498,12 @@ app.get('/instagram', function(req, res) {
 app.listen(3210, function() {
 
   console.log('Connecting to mongo');
-  mongoose.connect(conf.db);
-  server.db = mongoose.connection;
+  var expoWatchConn = mongoose.createConnection(conf.dbExpoWatch);
+  var yourExpoConn = mongoose.createConnection(conf.dbYourExpo);
+  server.expoWatchDb = expoWatchConn;
+  server.yourExpoDb = yourExpoConn;
+
+  Account = server.expoWatchDb.collection('accounts');
 
   console.log('Server up on port 3210');
 
