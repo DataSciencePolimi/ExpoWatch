@@ -46,5 +46,5 @@
   }],
   "db": "mongodb://localhost/expoWatch",
   "dbExpoWatch": "mongodb://localhost/expowatch",
-  "dbYourExpo": "mongodb://localhost:27017/yourexpo2015"
+  "dbYourExpo": "mongodb://localhost:27017/yourexpo2015newnew"
 }

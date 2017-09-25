@@ -57,11 +57,11 @@ function crawl() {
   });
 
   return Promise
-    .all(promises)
+    .settle(promises)
     .then(function() {
       debug('Iteration done');
     })
-  .delay(3600000)
+    .delay(3600000)
     .then(crawl);
 }
 
